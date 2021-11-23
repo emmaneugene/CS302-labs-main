@@ -1,0 +1,50 @@
+map $http_apikey $api_client_name {
+    default "";
+
+    "${api_gateway_key}" "client_admin";
+}
+
+server { 
+    listen 80;
+
+    location = /_validate_apikey {
+        internal;
+
+        if ($http_apikey = "") {
+            return 401; # Unauthorized
+        }
+        if ($api_client_name = "") {
+            return 403; # Forbidden
+        }
+
+        return 204; # OK (no content)
+    }
+    
+    location = /favicon.ico {
+        log_not_found off;
+    }
+
+    location /api/v1/games {
+        if ($request_method != GET) {
+            rewrite ^/api/v1/games(/.*)?$ /_api/v1/games$1 last;
+        }
+        proxy_pass ${games_service_url_internal}/games;
+    }
+
+    location /_api/v1/games {
+        internal;
+        auth_request /_validate_apikey;
+        proxy_pass ${games_service_url_internal}/games;
+    }
+    
+    location /api/v1/orders {
+        auth_request /_validate_apikey;
+        proxy_pass ${orders_service_url_internal}/orders;
+    }
+
+    location /api/v1/place-order {
+        auth_request /_validate_apikey;
+        proxy_pass ${place_order_service_url_internal}/place-order;
+    }
+
+}
