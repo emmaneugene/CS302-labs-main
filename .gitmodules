@@ -1,0 +1,15 @@
+[submodule "games-service"]
+	path = services/games
+	url = git@github.com:emmaneugene/CS302-labs-services-games.git
+[submodule "orders-service"]
+	path = services/orders
+	url = git@github.com:emmaneugene/CS302-labs-services-games.git
+[submodule "place-order-service"]
+	path = services/place-order
+	url = git@github.com:emmaneugene/CS302-labs-services-place-order.git
+[submodule "notifications-service"]
+	path = services/notifications
+	url = git@github.com:emmaneugene/CS302-labs-services-notifications.git
+[submodule "admin-web"]
+	path = user-interfaces/admin-web
+	url = git@github.com:emmaneugene/CS302-labs-ui-admin-web.git
