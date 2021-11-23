@@ -1,0 +1,105 @@
+version: "3.8"
+
+volumes:
+  rabbitmq_data:
+
+
+services:
+  ####################################
+  # RabbitMQ: The messaging broker   
+  ####################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes: 
+      - rabbitmq_data:/var/lib/rabbitmq
+  ####################################
+  # Atomic Microservice: Games
+  ####################################
+  games:
+    build:
+      context: ./services/games
+      dockerfile: Dockerfile
+    restart: always
+    env_file: 
+      - 'dev.env'
+  ####################################
+  # Atomic Microservice: Games 2
+  ####################################
+  games-2:
+    build:
+      context: ./services/games
+      dockerfile: Dockerfile
+    restart: always
+    env_file: 
+      - 'dev.env'
+  ####################################
+  # Atomic Microservice: Orders
+  ####################################
+  orders:
+    build:
+      context: ./services/orders
+      dockerfile: Dockerfile
+    restart: always
+    env_file: 
+      - 'dev.env'
+  ####################################
+  # Atomic Microservice: Notifications
+  ####################################
+  notifications:
+    build:
+      context: ./services/notifications
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - 'dev.env'
+    environment:
+      PYTHONUNBUFFERED: 1
+  ####################################
+  # Composite Microservice: Pl. Order
+  ####################################
+  place-order:
+    build:
+      context: ./services/place-order
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - games
+      - orders
+      - rabbitmq
+    env_file:
+      - 'dev.env'
+    environment:
+      PYTHONUNBUFFERED: 1
+  ####################################
+  # User Interface: Admin Web
+  ####################################
+  admin-web:
+    build:
+      context: ./user-interfaces/admin-web
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - 'dev.env'
+    ports:
+      - "8001:80"
+  ####################################
+  # nginx: API Gateway
+  ####################################
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - 'dev.env'
+    ports:
+      - "8080:80"
+
+    
