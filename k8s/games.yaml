@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: games-service
+  labels:
+    app: games-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: games-service
+  template:
+    metadata:
+      labels:
+        app: games-service
+    spec:
+      containers:
+      - name: games-service
+        image: registry.gitlab.com/cs302-labs-emmaneugene/services/games/main:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: env-vars-production
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      imagePullSecrets:
+      - name: gitlab-registry-access
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: games-service
+  labels:
+    app: games-service
+spec:
+  type: ClusterIP
+  selector:
+    app: games-service
+  ports:
+    - protocol: TCP
+      port: 30000
+      targetPort: 5000
+      name: web

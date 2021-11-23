@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: place-order-service
+  labels:
+    app: place-order-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: place-order-service
+  template:
+    metadata:
+      labels:
+        app: place-order-service
+    spec:
+      containers:
+      - name: place-order-service
+        image: registry.gitlab.com/cs302-labs-emmaneugene/services/place-order/main:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: env-vars-production
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      imagePullSecrets:
+      - name: gitlab-registry-access
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: place-order-service
+  labels:
+    app: place-order-service
+spec:
+  type: ClusterIP
+  selector:
+    app: place-order-service
+  ports:
+    - protocol: TCP
+      port: 32000
+      targetPort: 5000
+      name: web

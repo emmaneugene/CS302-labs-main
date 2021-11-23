@@ -1,0 +1,42 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: games-service-monitor
+  labels:
+    release: prometheus
+spec:
+  endpoints:
+  - interval: 15s
+    port: web
+  selector:
+    matchLabels:
+      app: games-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: orders-service-monitor
+  labels:
+    release: prometheus
+spec:
+  endpoints:
+  - interval: 15s
+    port: web
+  selector:
+    matchLabels:
+      app: orders-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: place-order-service-monitor
+  labels:
+    release: prometheus
+spec:
+  endpoints:
+  - interval: 15s
+    port: web
+  selector:
+    matchLabels:
+      app: place-order-service
+---
